@@ -3,80 +3,51 @@
 ## Prerequisites
 
 - Docker installed
+- kind (Kubernetes IN Docker) installed
 - Kubernetes cluster (Minikube, Docker Desktop, or cloud provider)
 - kubectl CLI
 - Python 3.8+
 - Git
 
-## 1. Clone the Repository
+## 1. Create Kubernetes Cluster
+
+```sh
+kind create cluster --config cluster.yml
+```
+
+## 2. Clone the Repository
 
 ```sh
 git clone <your-repo-url>
 cd devops_todolist_kubernetes_task_10_ingress
 ```
 
-## 2. Build & Run Locally (Optional)
+## 3. Deploy Application & Ingress
+
+Run the bootstrap script to deploy all resources and install the ingress controller:
 
 ```sh
-cd src
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
+bash bootstrap.sh
 ```
 
-## 3. Build Docker Image
+This will:
+- Create namespaces
+- Deploy MySQL and the application
+- Install/configure the NGINX ingress controller
 
-```sh
-docker build -t todolist-app:latest src/
-```
-
-## 4. Kubernetes Deployment
-
-### 4.1. Create Namespace
-
-```sh
-kubectl apply -f .infrastructure/app/ns.yml
-```
-
-### 4.2. Deploy MySQL
-
-```sh
-kubectl apply -f .infrastructure/mysql/ns.yml
-kubectl apply -f .infrastructure/mysql/configMap.yml
-kubectl apply -f .infrastructure/mysql/secret.yml
-kubectl apply -f .infrastructure/mysql/service.yml
-kubectl apply -f .infrastructure/mysql/statefulSet.yml
-```
-
-### 4.3. Deploy Application
-
-```sh
-kubectl apply -f .infrastructure/app/configMap.yml
-kubectl apply -f .infrastructure/app/secret.yml
-kubectl apply -f .infrastructure/app/pv.yml
-kubectl apply -f .infrastructure/app/pvc.yml
-kubectl apply -f .infrastructure/app/deployment.yml
-kubectl apply -f .infrastructure/app/clusterIp.yml
-kubectl apply -f .infrastructure/app/hpa.yml
-```
-
-### 4.4. Set Up Ingress
-
-```sh
-kubectl apply -f .infrastructure/ingress/ingress.yml
-```
-
-> **Note:** Ensure your cluster has an ingress controller (e.g., NGINX).
-
-## 5. Access the Application
+## 4. Access the Application
 
 - Find the ingress IP or domain:
   ```sh
   kubectl get ingress -n <namespace>
   ```
-- Open in browser: `http://<ingress-ip-or-domain>/`
+- Open in browser: `http://localhost/`
 
-## 6. Useful Commands
+**Validation:**  
+- Confirm the app loads at `http://localhost`.
+- Check browser console/network for absence of HTTP 404s on static assets and API calls.
+
+## 5. Useful Commands
 
 - View pods:
   ```sh
@@ -91,7 +62,7 @@ kubectl apply -f .infrastructure/ingress/ingress.yml
   kubectl logs <pod-name> -n <namespace>
   ```
 
-## 7. Troubleshooting
+## 6. Troubleshooting
 
 - Check pod status:
   ```sh
@@ -104,4 +75,4 @@ kubectl apply -f .infrastructure/ingress/ingress.yml
 
 ---
 
-For more details, check the manifests in `.infrastructure/` and source code
+For more details, check the manifests in `.infrastructure/` and source code in `src/`.
